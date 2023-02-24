@@ -16,10 +16,9 @@ class SignalDetection:
         "Returns the class as a labeled list to enable printing and error detection."
         return f"hits: {self.hits}, misses: {self.misses}, false alarms: {self.falseAlarms}, correct rejections: {self.correctRejections}"
 
-    def hit_rate(self):
+    def hit_rate(self)
         "Returns the hit rate based on the class object."
-        self.hr = (self.hits / (self.hits + self.misses))
-        return self.hr
+        return self.hr =  (self.hits / (self.hits+self.misses)
 
     def false_alarm_rate(self):
         "Returns the false alarm rate based on the class object."
