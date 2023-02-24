@@ -85,7 +85,7 @@ class SignalDetection:
         plt.plot(x, noise, label='Signal')
         plt.axvline(x=(d_prime / 2) + c, color='g', linestyle='--',
                     label='Threshold')  # vertical line over plot for d'/2+c
-        plt.plot([Nmax_x, Smax_x], [Nmax_y, Smax_y], linestyle='--', lw=2, color='b')
+        plt.plot([Nmax_x, Smax_x], [Nmax_y, Smax_y], linestyle='--', lw=2, color='r', label = 'd prime')
         plt.legend()
         plt.xlabel('Stimulus intensity')
         plt.ylabel('Probability density')
