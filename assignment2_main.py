@@ -97,6 +97,7 @@ sd = SignalDetection(30, 60, 80, 70)
 sd.plot_roc()
 sd.plot_sdt(sd.d_prime())
 
+#run the unit test suite
 import unittest
 from signaldetection import SignalDetection
 
@@ -132,6 +133,7 @@ class TestSignalDetection(unittest.TestCase):
         # Compare calculated and expected criterion
         self.assertAlmostEqual(obtained, expected, places=10)
 
+#test for corruption in code by altering hits
     def test_for_corruption(self):
         sd = SignalDetection(15, 5, 15, 5)
         obtained1 = sd.criterion()
