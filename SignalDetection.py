@@ -16,32 +16,21 @@ class SignalDetection:
         "Returns the class as a labeled list to enable printing and error detection."
         return f"hits: {self.hits}, misses: {self.misses}, false alarms: {self.falseAlarms}, correct rejections: {self.correctRejections}"
 
-    def hit_rate(self)
+    def hit_rate(self):
         "Returns the hit rate based on the class object."
-        return self.hr =  (self.hits / (self.hits+self.misses)
+        return self.hits / (self.hits+self.misses)
 
     def false_alarm_rate(self):
         "Returns the false alarm rate based on the class object."
-        self.far = (self.falseAlarms / (self.falseAlarms + self.correctRejections))
-        return self.far
+        return  self.falseAlarms / (self.falseAlarms + self.correctRejections)
 
     def d_prime(self):
         "Returns the d-prime value given the hit rate and false alarm rate."
-        hr = self.hit_rate()
-        far = self.false_alarm_rate()
-        z_h = stats.norm.ppf(hr)
-        z_fa = stats.norm.ppf(far)
-        self.dp = z_h - z_fa
-        return self.dp
+	return stats.normppf(self.hit_rate()) - stats.norm.ppf(self.false_alarm_rate())
 
     def criterion(self):
         "Returns the criterion value given the hit rate and false alarm rate."
-        hr = self.hit_rate()
-        far = self.false_alarm_rate()
-        z_h = stats.norm.ppf(hr)
-        z_fa = stats.norm.ppf(far)
-        self.c = -0.5 * (z_h + z_fa)
-        return self.c
+        return -0.5 * stats.norm.ppf(hr)-stats.norm.ppf(far)
 
     # overloading the + and * methods
     def __add__(self, other):
