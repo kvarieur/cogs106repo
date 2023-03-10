@@ -93,6 +93,7 @@ class SignalDetection:
             hr = sdt.hit_rate()
             far = sdt.false_alarm_rate()
             plt.plot(far, hr, 'o', label=f'd prime={sdt.d_prime():.2f}', linewidth=2, markersize=8)
+	    plt.grid()
         plt.ylabel('Hit Rate')
         plt.xlabel('False Alarm Rate')
         plt.legend()
