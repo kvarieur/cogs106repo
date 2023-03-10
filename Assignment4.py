@@ -97,7 +97,7 @@ class SignalDetection:
         plt.ylabel('Hit Rate')
         plt.xlabel('False Alarm Rate')
         plt.legend()
-        plt.title('Receive Operating Characteristic')
+        plt.title('ROC Curve')
         plt.show()
 
     def nLogLikelihood(self, hit_rate, false_alarm_rate):
