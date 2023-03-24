@@ -1,4 +1,8 @@
 import numpy as np
+import scipy.stats as stats
+import scipy.optimize as optimize
+import matplotlib.pyplot as plt
+
 from signaldetection import SignalDetection
 
 class Metropolis:
@@ -46,7 +50,6 @@ class Metropolis:
 
 #Integration test
 import scipy.stats
-import scipy
 import matplotlib.pyplot as plt
 import numpy as np
 
