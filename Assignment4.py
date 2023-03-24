@@ -79,16 +79,16 @@ class SignalDetection:
             far = 1 - stats.norm.cdf(k)
             hits = np.random.binomial(n=signalCount, p=hr)
             misses = signalCount - hits
-            falseAlarms = np.random.binomial(n=noiseCount,
-                                             p=far)  # get the hr and far from the dprime and criteria list and then use those to do random number generation for hits, misses, false alarms and correct rejections
+            falseAlarms = np.random.binomial(n=noiseCount, p=far)  # get the hr and far from the dprime and criteria list and then use those to do random number generation for hits, misses, false alarms and correct rejections
             correctRejections = noiseCount - falseAlarms
             sdtList.append(SignalDetection(hits, misses, falseAlarms, correctRejections))
         return sdtList
 
-    # adding ROC plot method
     @staticmethod
     def plot_roc(sdtList):
-        # plt.figure()
+	"""
+	Plot ROC Curve
+	"""
         plt.ylabel('Hit Rate')
         plt.xlabel('False Alarm Rate')
         plt.title('ROC Curve')
@@ -100,7 +100,10 @@ class SignalDetection:
         plt.plot([0, 1], [0, 1], 'k--', label='Chance')
 
     def nLogLikelihood(self, hit_rate, false_alarm_rate):
-        return - ((self.hits * np.log(hit_rate)) +
+        """
+	Calculate Negative Log Likelihood
+	"""
+	 return - ((self.hits * np.log(hit_rate)) +
                   (self.misses * np.log(1 - hit_rate)) +
                   (self.falseAlarms * np.log(false_alarm_rate)) +
                   (self.correctRejections * np.log(1 - false_alarm_rate)))
@@ -122,6 +125,9 @@ class SignalDetection:
 
     @staticmethod
     def fit_roc(sdtList):
+	"""
+	Plot fitted roc curve with minimized a Hat
+	"""
         SignalDetection.plot_roc(sdtList)
         a = 0
         minimize = optimize.minimize(fun=SignalDetection.rocLoss, args=sdtList, x0=a, method='BFGS')
@@ -134,26 +140,25 @@ class SignalDetection:
         plt.title('ROC Curve')
         plt.grid()
         plt.show()
-        # plt.legend()
         aHat = minimize.x
         return float(aHat)
 
     def plot_sdt(self):
+	"""
+	Signal Detection Plot (not used in this class)
+	"""
         c = self.d_prime / 2  # threshold value
         x = np.linspace(-4, 4, 1000)  # axes
         signal = stats.norm.pdf(x, loc=self.d_prime, scale=1)  # signalcurve
         noise = stats.norm.pdf(x, loc=0, scale=1)  # noisecurve
-        """
-        calculate max of signal and noise curves for d' line
-        """
+
+       # calculate max of signal and noise curves for d' line
         Nmax_y = np.max(noise)
         Nmax_x = x[np.argmax(noise)]
         Smax_y = np.max(signal)
         Smax_x = x[np.argmax(signal)]
 
-        """
-        plot curves
-        """
+       # plot curves
         plt.plot(x, signal, label='Noise')
         plt.plot(x, noise, label='Signal')
         plt.axvline(x=(self.d_prime / 2) + c, color='g', linestyle='--',
