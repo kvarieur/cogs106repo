@@ -86,11 +86,9 @@ class SignalDetection:
     # adding ROC plot method
     @staticmethod
     def plot_roc(sdtList):
-        plt.figure()
         plt.ylabel('Hit Rate')
         plt.xlabel('False Alarm Rate')
         plt.title('ROC Curve')
-        if isinstance (sdtList, list):
             for i in range (len(sdtList)):
                 sdt = sdtList[i]
                 plt.plot(sdt.false_alarm_rate(), sdt.hit_rate(), 'o', color='black', linewidth=2, markersize=8)
