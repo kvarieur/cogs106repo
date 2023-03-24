@@ -3,7 +3,6 @@ import scipy.stats as stats
 import scipy.optimize as optimize
 import matplotlib.pyplot as plt
 
-
 class SignalDetection:
 
     def __init__(self, hits, misses, falseAlarms, correctRejections):
@@ -69,7 +68,7 @@ class SignalDetection:
     @staticmethod
     def simulate(d_prime, criteriaList, signalCount, noiseCount):
         """
-        simulate signal detection object 
+        simulate signal detection object
         """
         sdtList = []
         for i in range(len(criteriaList)):
@@ -87,18 +86,16 @@ class SignalDetection:
     # adding ROC plot method
     @staticmethod
     def plot_roc(sdtList):
-        plt.plot([0,1], [0,1], 'k--', label= 'Chance')
-        #variables to be used in plot
-        for sdt in sdtList:
-            hr = sdt.hit_rate()
-            far = sdt.false_alarm_rate()
-            plt.plot(far, hr, 'o', label=f'd prime={sdt.d_prime():.2f}', linewidth=2, markersize=8)
-	    plt.grid()
+        plt.figure()
         plt.ylabel('Hit Rate')
         plt.xlabel('False Alarm Rate')
-        plt.legend()
         plt.title('ROC Curve')
-        plt.show()
+        if isinstance (sdtList, list):
+            for i in range (len(sdtList)):
+                sdt = sdtList[i]
+                plt.plot(sdt.false_alarm_rate(), sdt.hit_rate(), 'o', color='black', linewidth=2, markersize=8)
+        plt.plot([0,1], [0,1], 'k--', label= 'Chance')
+        plt.grid()
 
     def nLogLikelihood(self, hit_rate, false_alarm_rate):
         return - ((self.hits * np.log(hit_rate)) +
@@ -107,40 +104,41 @@ class SignalDetection:
                   (self.correctRejections * np.log(1 - false_alarm_rate)))
 
     @staticmethod
-    def rocCurve(false_alarm_rate, a):
-        return stats.norm.cdf(a + stats.norm.ppf(false_alarm_rate))
+    def rocCurve(falseAlarmRate, a):
+        return stats.norm.cdf(a + stats.norm.ppf(falseAlarmRate))
 
     @staticmethod
     def rocLoss(a, sdtList):
         Loss = 0
-        for sdt in sdtList:
+        for i in range(len(sdtList)):
+            sdt = sdtList[i]
             far = sdt.false_alarm_rate()
-            phr = sdt.rocCurve(far, a) #calculate predicted hit rate with above function
-            lsum = sdt.nLogLikelihood(phr, far) #adding up losses of nll of predicted hr and sdt objects
+            predictedHr = sdt.rocCurve(far, a) #calculate predicted hit rate with above function
+            lsum = sdt.nLogLikelihood(predictedHr, far) #adding up losses of nll of predicted hr and sdt objects
             Loss += lsum
-            return Loss
+        return Loss
 
     @staticmethod
     def fit_roc(sdtList):
+        SignalDetection.plot_roc(sdtList)
         a = 0
-        for sdt in sdtList:
-            SignalDetection.plot_roc(sdtList)
-            minimize = optimize.minimize(fun=sdt.rocLoss, args=sdtList, x0=a, method='BFGS') #fitting the function: minimizing a
-            aHat = minimize.x
-            x = np.linspace(0, 1, num=100)
-            y = sdt.rocCurve(x, aHat)
-            plt.plot(x, y, 'r-', linewidth=2, markersize=8)
+        minimize = optimize.minimize(fun=SignalDetection.rocLoss, args= sdtList, x0=a, method='BFGS')
+        Loss = []
+        for i in range(0,100,1):
+            Loss.append((SignalDetection.rocCurve(i/100, float(minimize.x))))
+        plt.plot(np.linspace(0,1,100), Loss, '-', color = 'r')#fitting the function: minimizing a
         plt.ylabel('Hit Rate')
         plt.xlabel('False Alarm Rate')
-        plt.title('Receive Operating Characteristic')
-        plt.legend()
+        plt.title('ROC Curve')
+        plt.show()
+        #plt.legend()
+        aHat = minimize.x
         return float(aHat)
-        #plt.show()
 
-    def plot_sdt(self, d_prime):
-        c = d_prime / 2  # threshold value
+    def plot_sdt(self):
+        c = self.d_prime / 2  # threshold value
         x = np.linspace(-4, 4, 1000)  # axes
-        signal = stats.norm.pdf(x, loc=d_prime, scale=1) #signalcurve
+        signal = stats.norm.pdf(x, loc=self.d_prime, scale=1) #signalcurve
         noise = stats.norm.pdf(x, loc=0, scale=1) #noisecurve
         """
         calculate max of signal and noise curves for d' line
@@ -155,7 +153,7 @@ class SignalDetection:
         """
         plt.plot(x, signal, label='Noise')
         plt.plot(x, noise, label='Signal')
-        plt.axvline(x=(d_prime / 2) + c, color='g', linestyle='--',
+        plt.axvline(x=(self.d_prime / 2) + c, color='g', linestyle='--',
                     label='Threshold')  # vertical line over plot for d'/2+c
         plt.plot([Nmax_x, Smax_x], [Nmax_y, Smax_y], linestyle='--', lw=2, color='r', label = 'd prime')
         plt.legend()
@@ -164,14 +162,14 @@ class SignalDetection:
         plt.title('Signal Detection Theory')
         plt.show()
 
-
-sdtList = SignalDetection.simulate(1.5, [-0.5, 0.0, 0.5, 0.7, 0.9], 100, 100) #hard coded test to check if plots are correct according to sd object
+sdtList = SignalDetection.simulate(1.5, [-0.5, 0.0, 0.5, 0.7, 0.9], 1e7, 1e7) #hard coded test to check if plots are correct according to sd object
 for sdt in sdtList:
     print(sdt)
 #SignalDetection.plot_roc(sdtList)
 SignalDetection.fit_roc(sdtList)
 
-#unit test from Professor V
+#Unit test from Professor V.
+
 import numpy as np
 import matplotlib.pyplot as plt
 import unittest
@@ -239,12 +237,12 @@ class TestSignalDetection(unittest.TestCase):
             """
             Test SignalDetection.simulate method with a single criterion value.
             """
-            dPrime = 1.5
+            d_prime = 1.5
             criteriaList = [0]
             signalCount = 1000
             noiseCount = 1000
 
-            sdtList = SignalDetection.simulate(dPrime, criteriaList, signalCount, noiseCount)
+            sdtList = SignalDetection.simulate(d_prime, criteriaList, signalCount, noiseCount)
             self.assertEqual(len(sdtList), 1)
             sdt = sdtList[0]
 
@@ -257,11 +255,11 @@ class TestSignalDetection(unittest.TestCase):
             """
             Test SignalDetection.simulate method with multiple criterion values.
             """
-            dPrime = 1.5
+            d_prime = 1.5
             criteriaList = [-0.5, 0, 0.5]
             signalCount = 1000
             noiseCount = 1000
-            sdtList = SignalDetection.simulate(dPrime, criteriaList, signalCount, noiseCount)
+            sdtList = SignalDetection.simulate(d_prime, criteriaList, signalCount, noiseCount)
             self.assertEqual(len(sdtList), 3)
             for sdt in sdtList:
                 self.assertLessEqual(sdt.hits, signalCount)
@@ -301,10 +299,10 @@ class TestSignalDetection(unittest.TestCase):
             """
             Test case to verify integration of SignalDetection simulation and ROC fitting.
             """
-            dPrime = 1
-            sdtList = SignalDetection.simulate(dPrime, [-1, 0, 1], 1e7, 1e7)
+            d_prime = 1
+            sdtList = SignalDetection.simulate(d_prime, [-1, 0, 1], 1e7, 1e7)
             aHat = SignalDetection.fit_roc(sdtList)
-            self.assertAlmostEqual(aHat, dPrime, places=2)
+            self.assertAlmostEqual(aHat, d_prime, places=2)
             plt.close()
 
 if __name__ == '__main__':
